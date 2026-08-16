@@ -9,12 +9,10 @@ export OUTPATH=./dist
 export ADD_HOOKS="self-updater.hook"
 export UPINFO="gh-releases-zsync|${GITHUB_REPOSITORY%/*}|${GITHUB_REPOSITORY#*/}|latest|*$ARCH.AppImage.zsync"
 export STARTUPWMCLASS=
-export ALWAYS_SOFTWARE=1
+export USE_HOST_DRIVERS_EXPERIMENTAL=1
 
 # Deploy dependencies
-quick-sharun ./AppDir/bin
-
-# Additional changes can be done in between here
+quick-sharun ./AppDir/bin/*
 
 # Fix: NetHack's HACKDIR is "." (current directory), so sharun
 # must cd to $APPDIR/bin (where data files are) before launching.
