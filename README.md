@@ -3,11 +3,11 @@
 # WIP PLEASE DONT USE YETNetHack-X11-AppImage 🐧
 
 [![GitHub Downloads](https://img.shields.io/github/downloads/pkgforge-dev/NetHack-X11-AppImage/total?logo=github&label=GitHub%20Downloads)](https://github.com/pkgforge-dev/NetHack-X11-AppImage/releases/latest)
-[![CI Build Status](https://github.com//pkgforge-dev/NetHack-X11-AppImage/actions/workflows/appimage.yml/badge.svg)](https://github.com/pkgforge-dev/NetHack-X11-AppImage/releases/latest)
+[![CI Build Status](https://github.com/pkgforge-dev/NetHack-X11-AppImage/actions/workflows/appimage.yml/badge.svg)](https://github.com/pkgforge-dev/NetHack-X11-AppImage/releases/latest)
 [![Latest Stable Release](https://img.shields.io/github/v/release/pkgforge-dev/NetHack-X11-AppImage)](https://github.com/pkgforge-dev/NetHack-X11-AppImage/releases/latest)
 
 <p align="center">
-  <img src="https://github.com/Link4Electronics/NetHack-X11-AppImage/blob/main/AppDir/nethack-x11.png" width="128" />
+  <img src="AppDir/nethack-x11.png" width="128" />
 </p>
 
 
@@ -19,7 +19,7 @@
 
 ---
 
-AppImage made using [sharun](https://github.com/VHSgunzo/sharun) and its wrapper [quick-sharun](https://github.com/pkgforge-dev/Anylinux-AppImages/blob/main/useful-tools/quick-sharun.sh), which makes it extremely easy to turn any binary into a portable package reliably without using containers or similar tricks. 
+AppImage made using [quick-sharun](https://github.com/pkgforge-dev/Anylinux-AppImages/blob/main/useful-tools/quick-sharun.sh), which makes it extremely easy to turn any binary into a portable package reliably without using containers or similar tricks. 
 
 **This AppImage bundles everything and it should work on any Linux distro, including old and musl-based ones.**
 
