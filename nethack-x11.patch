@@ -1,6 +1,5 @@
-diff --git a/include/config.h b/include/config.h
---- a/include/config.h	2026-05-02 13:47:25.000000000 -0300
-+++ b/include/config.h	2026-07-09 11:14:01.719408189 -0300
+--- a/include/config.h
++++ b/include/config.h
 @@ -56,7 +56,7 @@
  #define TTY_GRAPHICS /* good old tty-based graphics */
  #endif
@@ -55,9 +54,8 @@ diff --git a/include/config.h b/include/config.h
  
  /*
   * If it is desirable to limit the number of people that can play Hack
-diff --git a/include/unixconf.h b/include/unixconf.h
---- a/include/unixconf.h	2026-05-02 13:47:25.000000000 -0300
-+++ b/include/unixconf.h	2026-07-09 11:14:01.719589330 -0300
+--- a/include/unixconf.h
++++ b/include/unixconf.h
 @@ -82,8 +82,9 @@
  /*
   * If you want the static parts of your playground on a read-only file
@@ -78,41 +76,17 @@ diff --git a/include/unixconf.h b/include/unixconf.h
  #endif
  #if defined(MACOS) && !defined(TIMED_DELAY)
  #define TIMED_DELAY
-diff --git a/src/files.c b/src/files.c
---- a/src/files.c	2026-05-02 13:47:25.000000000 -0300
-+++ b/src/files.c	2026-07-09 11:16:44.048951387 -0300
-@@ -11,6 +11,7 @@
- 
- #include "hack.h"
- #include "dlb.h"
-+#include <errno.h>
- 
- #ifdef SFCTOOL
- #ifdef TTY_GRAPHICS
-@@ -2711,7 +2712,9 @@
-         (void) chmod(fq_record, FCMASK | 007);
- #endif /* VMS && !SECURE */
-     } else {
-+        int save_errno = errno;
-         raw_printf("Warning: cannot write scoreboard file '%s'", fq_record);
-+        raw_printf(" open_errno=%d", save_errno);
-         wait_synch();
-     }
- #endif /* !UNIX && !VMS */
-diff --git a/src/invent.c b/src/invent.c
---- a/src/invent.c	2026-05-02 13:47:25.000000000 -0300
-+++ b/src/invent.c	2026-07-09 11:14:01.721186862 -0300
-@@ -4296,6 +4296,7 @@
-                 picked_some ? "Other things" : "Things",
-                 Blind ? "you feel" : "are");
-         putstr(tmpwin, 0, buf);
-+        putstr(tmpwin, 0, ""); /* add a separator */
-         for (; otmp; otmp = otmp->nexthere) {
-             if (otmp->otyp == CORPSE && will_feel_cockatrice(otmp, FALSE)) {
-                 felt_cockatrice = TRUE;
-diff --git a/sys/unix/Makefile.src b/sys/unix/Makefile.src
---- a/sys/unix/Makefile.src	2026-05-02 13:47:25.000000000 -0300
-+++ b/sys/unix/Makefile.src	2026-07-09 11:14:01.721416024 -0300
+--- a/sys/unix/Makefile.src
++++ b/sys/unix/Makefile.src
+@@ -263,7 +263,7 @@
+ WINX11OBJ = $(TARGETPFX)Window.o $(TARGETPFX)dialogs.o $(TARGETPFX)winX.o \
+ 	$(TARGETPFX)winmap.o $(TARGETPFX)winmenu.o $(TARGETPFX)winmesg.o \
+ 	$(TARGETPFX)winmisc.o $(TARGETPFX)winstat.o $(TARGETPFX)wintext.o \
+-	$(TARGETPFX)winval.o #$(TARGETPFX)tile.o
++	$(TARGETPFX)winval.o $(TARGETPFX)tile.o
+ #
+ # Files for a Qt 3 interface (renamed since nethack 3.6.x)
+ #
 @@ -318,8 +318,8 @@
  #	$(TARGETPFX)tile.o
  #
@@ -150,9 +124,8 @@ diff --git a/sys/unix/Makefile.src b/sys/unix/Makefile.src
  #
  # For Curses
  #WINLIB = $(WINCURSESLIB)
-diff --git a/sys/unix/Makefile.top b/sys/unix/Makefile.top
---- a/sys/unix/Makefile.top	2026-05-02 13:47:25.000000000 -0300
-+++ b/sys/unix/Makefile.top	2026-07-09 11:14:01.721454357 -0300
+--- a/sys/unix/Makefile.top
++++ b/sys/unix/Makefile.top
 @@ -61,7 +61,7 @@
  #	X11 without Qt:
  # VARDATND = x11tiles NetHack.ad pet_mark.xbm pilemark.xbm
@@ -162,49 +135,28 @@ diff --git a/sys/unix/Makefile.top b/sys/unix/Makefile.top
  #	both X11 and Qt:
  # VARDATND = x11tiles nhtiles.bmp NetHack.ad pet_mark.xbm pilemark.xbm rip.xpm
  #	Qt without X11; assumes GRAPHIC_TOMBSTONE:
-diff --git a/sys/unix/unixmain.c b/sys/unix/unixmain.c
---- a/sys/unix/unixmain.c	2026-05-02 13:47:25.000000000 -0300
-+++ b/sys/unix/unixmain.c	2026-07-09 11:24:52.034848194 -0300
-@@ -15,6 +15,8 @@
- #include <fcntl.h>
- #endif
- 
-+#include <errno.h>
-+
- #ifdef NHUUID
- /* for uuid */
- #ifdef LINUX
-@@ -504,12 +506,32 @@
+--- a/sys/unix/unixmain.c
++++ b/sys/unix/unixmain.c
+@@ -504,12 +504,24 @@
           * system's layout is being used.
           */
  #ifdef VAR_PLAYGROUND
 -        int len = strlen(VAR_PLAYGROUND);
--
--        /* FIXME: this allocation never gets freed.
--         */
 +        int len;
 +        char pbuf[BUFSZ];
-+        struct stat st;
-+        const char *usr = nh_getenv("USER");
-+        if (!usr || !*usr) usr = "nethack";
-+        Sprintf(pbuf, "/tmp/.nethack-%s", usr);
-+        if (mkdir(pbuf, 0755) < 0) {
-+            if (errno != EEXIST) {
-+                write(2, pbuf, strlen(pbuf));
-+                write(2, ": mkdir errno=", 15);
-+                { char eb[16]; Sprintf(eb, "%d\n", errno); write(2, eb, strlen(eb)); }
-+            }
-+            /* already exists; ensure writable */
-+            if (stat(pbuf, &st) < 0) {
-+                write(2, "stat failed\n", 12);
-+            } else if (!S_ISDIR(st.st_mode)) {
-+                write(2, "not a directory\n", 17);
-+                unlink(pbuf);
-+                mkdir(pbuf, 0755);
-+            }
-+            (void) chmod(pbuf, 0755);
++        const char *home = nh_getenv("HOME");
++
++        if (home && *home && VAR_PLAYGROUND[0] != '/') {
++            Sprintf(pbuf, "%s/%s", home, VAR_PLAYGROUND);
++        } else {
++            Strcpy(pbuf, VAR_PLAYGROUND);
 +        }
++        (void) mkdir(pbuf, 0700);
++        (void) chmod(pbuf, 0700);
 +        len = strlen(pbuf);
+ 
+         /* FIXME: this allocation never gets freed.
+          */
          gf.fqn_prefix[SCOREPREFIX] = (char *) alloc(len + 2);
 -        Strcpy(gf.fqn_prefix[SCOREPREFIX], VAR_PLAYGROUND);
 +        Strcpy(gf.fqn_prefix[SCOREPREFIX], pbuf);
