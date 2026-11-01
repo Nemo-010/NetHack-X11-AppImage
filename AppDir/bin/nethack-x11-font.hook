@@ -11,8 +11,8 @@ if [ -n "$DISPLAY" ] && command -v xlsfonts >/dev/null 2>&1; then
 	nh_default='-*-fixed-medium-*-*-*-15-*-*-*-*-*-*-*'
 
 	if [ -z "$(xlsfonts -fn "$nh_default" 2>/dev/null)" ] \
-	   && [ -d "$APPDIR/share/fonts/misc" ] && command -v xset >/dev/null 2>&1; then
-		xset +fp "$APPDIR/share/fonts/misc" 2>/dev/null || :
+	   && [ -d "$APPDIR/bin/fonts" ] && command -v xset >/dev/null 2>&1; then
+		xset +fp "$APPDIR/bin/fonts" 2>/dev/null || :
 		xset fp rehash 2>/dev/null || :
 	fi
 

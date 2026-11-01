@@ -28,8 +28,9 @@ make fetch-lua
 make -j1 # Multi-threaded builds fail
 cp sys/unix/sysconf dat/sysconf
 mv -v src/nethack dat/* ../AppDir/bin
-mkdir -p ./AppDir/share/fonts/misc
+mkdir -p ../AppDir/bin/fonts
 for nh_pcf in 6x13 8x13 9x15 10x20; do
-	gzip -dc "/usr/share/fonts/misc/${nh_pcf}-ISO8859-1.pcf.gz" > "./AppDir/share/fonts/misc/${nh_pcf}-ISO8859-1.pcf"
+	gzip -dc "/usr/share/fonts/misc/${nh_pcf}-ISO8859-1.pcf.gz" > "../AppDir/bin/fonts/${nh_pcf}-ISO8859-1.pcf"
 done
-mkfontdir ./AppDir/share/fonts/misc
+mkfontdir ../AppDir/bin/fonts
+ls -l ../AppDir/bin/fonts
