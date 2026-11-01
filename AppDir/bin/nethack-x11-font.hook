@@ -3,33 +3,51 @@
 # NetHack draws with server-side core fonts and treats any X error as fatal,
 # so a server without the -*-fixed-medium-*-15-* that the template NetHack.ad
 # asks for stops the launch with "BadName" before the map is drawn. That is
-# most Wayland desktops, where xorg-fonts-misc is not installed. Xt reads
-# XENVIRONMENT as user resources, which override the template it is given as
-# fallback resources, so a font the server really has can be put in front of
-# it. Nothing is written when the preferred font is available.
+# most Wayland desktops, where xorg-fonts-misc is not installed. Core fonts
+# are served by the X server itself, so the bundled copy has to be added to
+# its font path before the game starts.
 
-if [ -n "$DISPLAY" ] && command -v xlsfonts >/dev/null 2>&1 \
-   && [ -z "$(xlsfonts -fn '-*-fixed-medium-*-*-*-15-*-*-*-*-*-*-*' 2>/dev/null)" ]; then
-	nh_font=''
-	for nh_try in \
-		'-*-fixed-medium-*-*-*-14-*-*-*-*-*-*-*' \
-		'-*-fixed-medium-*-*-*-13-*-*-*-*-*-*-*' \
-		'fixed'; do
-		if [ -n "$(xlsfonts -fn "$nh_try" 2>/dev/null)" ]; then
-			nh_font=$nh_try
-			break
+if [ -n "$DISPLAY" ] && command -v xlsfonts >/dev/null 2>&1; then
+	nh_default='-*-fixed-medium-*-*-*-15-*-*-*-*-*-*-*'
+
+	if [ -z "$(xlsfonts -fn "$nh_default" 2>/dev/null)" ] \
+	   && [ -d "$APPDIR/bin/fonts" ] && command -v xset >/dev/null 2>&1; then
+		nh_fonts=${XDG_CACHE_HOME:-$HOME/.cache}/nethack-x11/fonts
+		if ! mkdir -p "$nh_fonts" 2>/dev/null \
+		   || ! cp -f "$APPDIR"/bin/fonts/* "$nh_fonts"/ 2>/dev/null; then
+			nh_fonts=$APPDIR/bin/fonts
 		fi
-	done
-	if [ -n "$nh_font" ]; then
-		nh_rsrc="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/nethack-x11-font.ad"
-		for nh_win in '' 'display_file*' 'map*' 'text*' 'menu*' 'tombstone*' \
-		              'text*rip*'; do
-			printf 'NetHack*%sfont: %s\n' "$nh_win" "$nh_font"
-		done > "$nh_rsrc" 2>/dev/null && {
-			XENVIRONMENT=$nh_rsrc
-			export XENVIRONMENT
-		}
-		unset nh_win nh_rsrc
+		xset +fp "$nh_fonts" 2>/dev/null || :
+		xset fp rehash 2>/dev/null || :
+		if [ -z "$(xlsfonts -fn "$nh_default" 2>/dev/null)" ]; then
+			>&2 echo "NetHack: the X server offers no fixed 15 pixel font and would not take $nh_fonts into its font path"
+		fi
+		unset nh_fonts
 	fi
-	unset nh_font nh_try
+
+	if [ -z "$(xlsfonts -fn "$nh_default" 2>/dev/null)" ]; then
+		nh_font=''
+		for nh_try in \
+			'-*-fixed-medium-*-*-*-14-*-*-*-*-*-*-*' \
+			'-*-fixed-medium-*-*-*-13-*-*-*-*-*-*-*' \
+			'fixed'; do
+			if [ -n "$(xlsfonts -fn "$nh_try" 2>/dev/null)" ]; then
+				nh_font=$nh_try
+				break
+			fi
+		done
+		if [ -n "$nh_font" ]; then
+			nh_rsrc="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/nethack-x11-font.ad"
+			for nh_win in '' 'display_file*' 'map*' 'text*' 'menu*' \
+			              'tombstone*' 'text*rip*'; do
+				printf 'NetHack*%sfont: %s\n' "$nh_win" "$nh_font"
+			done > "$nh_rsrc" 2>/dev/null && {
+				XENVIRONMENT=$nh_rsrc
+				export XENVIRONMENT
+			}
+			unset nh_win nh_rsrc
+		fi
+		unset nh_font nh_try
+	fi
+	unset nh_default
 fi
