@@ -13,7 +13,7 @@ export STARTUPWMCLASS=
 export USE_HOST_DRIVERS_EXPERIMENTAL=1
 
 # Deploy dependencies
-quick-sharun ./AppDir/bin/* /usr/bin/xlsfonts
+quick-sharun ./AppDir/bin/* /usr/bin/xlsfonts /usr/bin/xset
 echo 'SHARUN_WORKING_DIR=${SHARUN_DIR}/bin' >> ./AppDir/.env
 
 # Turn AppDir into AppImage
