@@ -6,7 +6,7 @@ ARCH=$(uname -m)
 
 echo "Installing package dependencies..."
 echo "---------------------------------------------------------------"
-pacman -Syu --noconfirm libxaw lua54 setconf
+pacman -Syu --noconfirm libxaw lua54 setconf xorg-xlsfonts
 
 echo "Installing debloated packages..."
 echo "---------------------------------------------------------------"
