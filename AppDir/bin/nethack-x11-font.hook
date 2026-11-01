@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# NetHack draws with server-side core fonts and treats any X error as fatal,
+# so a server without the -*-fixed-medium-*-15-* that the template NetHack.ad
+# asks for stops the launch with "BadName" before the map is drawn. That is
+# most Wayland desktops, where xorg-fonts-misc is not installed. Xt reads
+# XENVIRONMENT as user resources, which override the template it is given as
+# fallback resources, so a font the server really has can be put in front of
+# it. Nothing is written when the preferred font is available.
+
+if [ -n "$DISPLAY" ] && command -v xlsfonts >/dev/null 2>&1 \
+   && [ -z "$(xlsfonts -fn '-*-fixed-medium-*-*-*-15-*-*-*-*-*-*-*' 2>/dev/null)" ]; then
+	nh_font=''
+	for nh_try in \
+		'-*-fixed-medium-*-*-*-14-*-*-*-*-*-*-*' \
+		'-*-fixed-medium-*-*-*-13-*-*-*-*-*-*-*' \
+		'fixed'; do
+		if [ -n "$(xlsfonts -fn "$nh_try" 2>/dev/null)" ]; then
+			nh_font=$nh_try
+			break
+		fi
+	done
+	if [ -n "$nh_font" ]; then
+		nh_rsrc="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/nethack-x11-font.ad"
+		for nh_win in '' 'display_file*' 'map*' 'text*' 'menu*' 'tombstone*' \
+		              'text*rip*'; do
+			printf 'NetHack*%sfont: %s\n' "$nh_win" "$nh_font"
+		done > "$nh_rsrc" 2>/dev/null && {
+			XENVIRONMENT=$nh_rsrc
+			export XENVIRONMENT
+		}
+		unset nh_win nh_rsrc
+	fi
+	unset nh_font nh_try
+fi
