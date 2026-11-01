@@ -19,6 +19,7 @@ quick-sharun ./AppDir/bin/*
 # SHARUN_WORKING_DIR tells the sharun binary to chdir there first.
 # NETHACKDIR is deliberately NOT set here to activate VAR_PLAYGROUND
 # in chdirx(), which redirects writable files to $HOME/.nethack.
+echo 'SHARUN_WORKING_DIR=${SHARUN_DIR}/bin' >> ./AppDir/.env
 
 # Turn AppDir into AppImage
 quick-sharun --make-appimage
