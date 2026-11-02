@@ -164,3 +164,23 @@
          if (gf.fqn_prefix[SCOREPREFIX][len - 1] != '/') {
              gf.fqn_prefix[SCOREPREFIX][len] = '/';
              gf.fqn_prefix[SCOREPREFIX][len + 1] = '\0';
+--- a/win/X11/winmap.c
++++ b/win/X11/winmap.c
+@@ -1812,7 +1812,6 @@
+     const char *p;
+     size_t len;
+     char unicode_font[BUFSZ];
+-    Font font_id;
+ 
+     /* Query the configured font for the map */
+     fs = WindowFontStruct(wp->w);
+@@ -1847,8 +1846,7 @@
+     strcpy(unicode_font + len, "iso10646-1");
+     font_name = unicode_font;
+ 
+-    font_id = XLoadFont(XtDisplay(wp->w), font_name);
+-    map_info->text_map.font = XQueryFont(XtDisplay(wp->w), font_id);
++    map_info->text_map.font = XLoadQueryFont(XtDisplay(wp->w), font_name);
+     if (map_info->text_map.font == NULL) {
+         /* Fallback in case no iso10646 */
+         map_info->text_map.font = fs;
