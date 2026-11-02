@@ -12,8 +12,17 @@ if [ -n "$DISPLAY" ] && command -v xlsfonts >/dev/null 2>&1; then
 
 	if [ -z "$(xlsfonts -fn "$nh_default" 2>/dev/null)" ] \
 	   && [ -d "$APPDIR/bin/fonts" ] && command -v xset >/dev/null 2>&1; then
-		xset +fp "$APPDIR/bin/fonts" 2>/dev/null || :
+		nh_fonts=${XDG_CACHE_HOME:-$HOME/.cache}/nethack-x11/fonts
+		if ! mkdir -p "$nh_fonts" 2>/dev/null \
+		   || ! cp -f "$APPDIR"/bin/fonts/* "$nh_fonts"/ 2>/dev/null; then
+			nh_fonts=$APPDIR/bin/fonts
+		fi
+		xset +fp "$nh_fonts" 2>/dev/null || :
 		xset fp rehash 2>/dev/null || :
+		if [ -z "$(xlsfonts -fn "$nh_default" 2>/dev/null)" ]; then
+			>&2 echo "NetHack: the X server offers no fixed 15 pixel font and would not take $nh_fonts into its font path"
+		fi
+		unset nh_fonts
 	fi
 
 	if [ -z "$(xlsfonts -fn "$nh_default" 2>/dev/null)" ]; then

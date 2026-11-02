@@ -29,8 +29,10 @@ make -j1 # Multi-threaded builds fail
 cp sys/unix/sysconf dat/sysconf
 mv -v src/nethack dat/* ../AppDir/bin
 mkdir -p ../AppDir/bin/fonts
-for nh_pcf in 6x13 8x13 9x15 10x20; do
-	gzip -dc "/usr/share/fonts/misc/${nh_pcf}-ISO8859-1.pcf.gz" > "../AppDir/bin/fonts/${nh_pcf}-ISO8859-1.pcf"
+for nh_pcf in 6x13 6x13B 8x13 8x13B 9x15 9x15B 10x20; do
+	for nh_enc in '' '-ISO8859-1'; do
+		gzip -dc "/usr/share/fonts/misc/${nh_pcf}${nh_enc}.pcf.gz" > "../AppDir/bin/fonts/${nh_pcf}${nh_enc}.pcf"
+	done
 done
 mkfontdir ../AppDir/bin/fonts
 ls -l ../AppDir/bin/fonts
